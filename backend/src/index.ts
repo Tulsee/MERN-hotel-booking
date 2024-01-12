@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import "dotenv/config";
 import mongoose from "mongoose";
+import userRoutes from "./routes/users.routes";
 
 mongoose.connect(process.env.MONGO_URI as string).then(() => {
   console.log("connected to database");
@@ -16,10 +17,8 @@ app.use(
 );
 app.use(cors());
 
-app.get("/api/test", async (req: Request, res: Response) => {
-  res.json({ message: "hello from shankar ghimire" });
-});
+app.use("/api/users", userRoutes);
 
 app.listen(3000, () => {
-  console.log(`server is running on port 300`);
+  console.log(`server is running on port 3000`);
 });
