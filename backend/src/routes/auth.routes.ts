@@ -21,17 +21,17 @@ router.post(
   async (req: Request, res: Response) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
-      return res.status(400).json({ message: error.array() });
+      return res.status(400).send({ message: error.array() });
     }
     const { email, password } = req.body;
     try {
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(400).json({ message: "Inavlid Credentials" });
+        return res.status(400).json({ message: "Invalid Credentials" });
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Inavlid Credentials" });
+        return res.status(400).json({ message: "Invalid Credentials" });
       }
       const token = jwt.sign(
         { userId: user.id },
@@ -46,16 +46,23 @@ router.post(
         secure: process.env.NODE_ENV === "production",
         maxAge: 172800000,
       });
-      return res.status(200).send({ message: "User registered OK" });
+      return res.status(200).send({ message: "User logged-In OK" });
     } catch (error) {
       console.log(error);
-      return res.status(500).send({ message: "Something went wrong" });
+      res.status(500).send({ message: "Something went wrong" });
     }
   }
 );
 
 router.get("/validate-token", verifyToken, (req: Request, res: Response) => {
   return res.status(200).send({ userId: req.userId });
+});
+
+router.post("/logout", (req: Request, res: Response) => {
+  res.cookie("auth_token", "", {
+    expires: new Date(0),
+  });
+  res.send();
 });
 
 export default router;
